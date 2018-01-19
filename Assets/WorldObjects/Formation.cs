@@ -64,7 +64,7 @@ public class Formation : WorldObject
         for (int i = 0; i < 3; ++i)
         {
             float zBase = ((_formationWidth / 2) + 1) * _spacing;
-            if (!left)
+            if (left)
             {
                 zBase = -zBase;
             }
@@ -98,7 +98,8 @@ public class Formation : WorldObject
     {
         base.Awake();
         _actions = new string[] { StopAction, ReinforceAction };
-        GeneratePositions(FormationType.Field);
+        _currType = FormationType.Field;
+        GeneratePositions(_currType);
         _meleeUnits = new List<Unit>(_relativePositions.Length / 2);
         _missileUnits = new List<Unit>(_relativePositions.Length / 2);
         _issuedOrder = false;
@@ -108,6 +109,8 @@ public class Formation : WorldObject
         _leaderDriftThreshold = 5.0f * 5.0f;
         _maxDrift = 6.0f * 6.0f;
         _unitDriftThreshold = 1.5f * 1.5f;
+
+        _wallsLayerMask = LayerMask.GetMask("Walls");
     }
 
     // Use this for initialization
@@ -272,6 +275,7 @@ public class Formation : WorldObject
     {
         while (true)
         {
+            CheckWallBehavior();
             ComputeCenterOfMass();
             AdjustLeaderSpeed();
             AdjustUnitSpeed();
@@ -385,6 +389,84 @@ public class Formation : WorldObject
         {
             NavMeshAgent agent = unit.GetComponent<NavMeshAgent>();
             agent.speed = _leaderBaseSpeed;
+        }
+    }
+
+    private void CheckWallBehavior()
+    {
+        Collider[] walls = Physics.OverlapSphere(_virtualLeader.transform.position, 0.2f, _wallsLayerMask);
+        if (walls.Length > 0)
+        {
+            Transform wallAlignMarker = null;
+            float minDist = -1.0f;
+            foreach (Collider w in walls)
+            {
+                float currDist = (w.transform.position - transform.position).sqrMagnitude;
+                if (minDist < 0 || currDist < minDist)
+                {
+                    Transform currMarker = w.transform.Find("AlignMarker");
+                    if (currMarker != null)
+                    {
+                        minDist = currDist;
+                        wallAlignMarker = currMarker;
+                    }
+                }
+            }
+
+            if (wallAlignMarker != null)
+            {
+                FormationType newType = FormationType.WallLeft;
+                if (_leaderNavAgent.enabled)
+                {
+                    if (Vector3.Dot(_leaderNavAgent.velocity, wallAlignMarker.right) > 0.0f)
+                    {
+                        newType = FormationType.WallLeft;
+                    }
+                    else
+                    {
+                        newType = FormationType.WallRight;
+                    }
+                }
+                if (_currType != newType)
+                {
+                    _currType = newType;
+                    GeneratePositions(_currType);
+                }
+                _currWall = wallAlignMarker;
+            }
+        }
+        else
+        {
+            if (_currType != FormationType.Field)
+            {
+                _currType = FormationType.Field;
+                GeneratePositions(_currType);
+                _currWall = null;
+            }
+        }
+
+        if (_currWall)
+        {
+            Vector3 currWallAxis = _currWall.right;
+
+            Vector3 currPos = _virtualLeader.transform.position;
+            if (_leaderNavAgent.enabled)
+            {
+                Vector3 currDest = _leaderNavAgent.destination;
+                Vector3 vecToDest = currDest - _currWall.position;
+                Vector3 newDest = _currWall.position + Vector3.Project(vecToDest, currWallAxis);
+                _issuedOrder = true;
+                _rotateAtTarget = true;
+                _leaderNavAgent.SetDestination(newDest);
+                _targetRotation = Quaternion.LookRotation(currWallAxis);
+            }
+            else
+            {
+                Vector3 vecToPos = currPos - _currWall.position;
+                Vector3 newPos = _currWall.position + Vector3.Project(vecToPos, currWallAxis);
+                _virtualLeader.transform.position = newPos;
+                _virtualLeader.transform.rotation = Quaternion.LookRotation(currWallAxis);
+            }
         }
     }
 
@@ -837,6 +919,7 @@ public class Formation : WorldObject
     private Quaternion _targetRotation;
     private bool _rotateAtTarget;
     public FormationBehavior _attackBehavior;
+    private FormationType _currType;
     private int _formationWidth = 7;
     private float _spacing = 2.0f;
     private Formation _attackTargetFormation;
@@ -851,4 +934,7 @@ public class Formation : WorldObject
     private float _unitDriftThreshold;
     private float _minSpeedModifier = 0.3f;
     private float _speedModifier;
+
+    private int _wallsLayerMask;
+    private Transform _currWall = null;
 }
