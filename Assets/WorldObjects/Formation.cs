@@ -769,7 +769,7 @@ public class Formation : WorldObject
                 if (t.Owner == _owner)
                 {
                     Vector3 vecToTownCenter = t.ControlCircleCenter.position - transform.position;
-                    if (vecToTownCenter.sqrMagnitude < ResourceManager.ReinforceRadius * ResourceManager.ReinforceRadius)
+                    if (vecToTownCenter.sqrMagnitude < t.CaptureRange * t.CaptureRange)
                     {
                         t.ReinforceFormation(this);
                         break;

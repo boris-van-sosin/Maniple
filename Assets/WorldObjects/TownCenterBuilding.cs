@@ -85,7 +85,7 @@ public class TownCenterBuilding : Building
             {
                 if (t++ >= (_ticksToResource - 1))
                 {
-                    _owner.AddResource(GameResources.ResourceType.Money, 500);
+                    _owner.AddResource(GameResources.ResourceType.Money, ResourcesPerTick);
                     t = 0;
                 }
             }
@@ -253,6 +253,7 @@ public class TownCenterBuilding : Building
     private static readonly int _controlCircleSegemets = 32;
     public int CaptureRange;
     private readonly int _ticksToResource = 10;
+    public int ResourcesPerTick = 5;
     public readonly Dictionary<string, ProductionAspect.ProductionItem> ActionsDict = new Dictionary<string, ProductionAspect.ProductionItem>();
 
     public delegate void TownFormationDlg(TownCenterBuilding t, Formation f);

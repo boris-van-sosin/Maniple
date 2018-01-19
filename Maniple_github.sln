@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2017
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maniple_github", "Maniple_github.csproj", "{E29A51A8-1321-1AB3-A651-9713DA096022}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maniple_github.Plugins", "Maniple_github.Plugins.csproj", "{16DA2547-9A6C-4413-8C21-CB104BEBBF91}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maniple_github.Editor", "Maniple_github.Editor.csproj", "{A528A4A8-F0A4-7858-1BC1-993E76428175}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E29A51A8-1321-1AB3-A651-9713DA096022}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E29A51A8-1321-1AB3-A651-9713DA096022}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E29A51A8-1321-1AB3-A651-9713DA096022}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E29A51A8-1321-1AB3-A651-9713DA096022}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16DA2547-9A6C-4413-8C21-CB104BEBBF91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16DA2547-9A6C-4413-8C21-CB104BEBBF91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16DA2547-9A6C-4413-8C21-CB104BEBBF91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16DA2547-9A6C-4413-8C21-CB104BEBBF91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A528A4A8-F0A4-7858-1BC1-993E76428175}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A528A4A8-F0A4-7858-1BC1-993E76428175}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A528A4A8-F0A4-7858-1BC1-993E76428175}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A528A4A8-F0A4-7858-1BC1-993E76428175}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

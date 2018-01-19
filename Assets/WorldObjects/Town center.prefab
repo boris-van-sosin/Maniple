@@ -83,7 +83,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1014502563239924}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.13, y: -3.98, z: 0}
+  m_LocalPosition: {x: -0, y: -0.9, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4805596176265984}
@@ -96,7 +96,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1094227129707442}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.01, y: -15.42, z: 0}
+  m_LocalPosition: {x: 0.4, y: -21.7, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4805596176265984}
@@ -109,7 +109,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1737278460737758}
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 2.564392, y: -8.4, z: -0.3}
+  m_LocalPosition: {x: 0.5, y: -20.4, z: -0.17}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4805596176265984}
@@ -121,8 +121,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1065273820737672}
-  m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0.5356064, y: 0.30553275, z: -12.941961}
+  m_LocalRotation: {x: -0.115481734, y: -0.6976131, z: -0.6976131, w: 0.115481734}
+  m_LocalPosition: {x: 200.74171, y: 7.405029, z: 608.32935}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4762165962805892}
@@ -130,7 +130,7 @@ Transform:
   - {fileID: 4709317233985674}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -90.00001, y: 0, z: -161.201}
 --- !u!23 &23370002839126108
 MeshRenderer:
   m_ObjectHideFlags: 1
@@ -196,7 +196,8 @@ MonoBehaviour:
   ProductionName: Village Center
   DisplayName: Village Center
   CardImage: {fileID: 2800000, guid: f45ef039e80233d40a2d838d3813ddad, type: 3}
-  CaptureRange: 5
+  CaptureRange: 12
+  ResourcesPerTick: 30
 --- !u!120 &120000833876943406
 LineRenderer:
   m_ObjectHideFlags: 1
