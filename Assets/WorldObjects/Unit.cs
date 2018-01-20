@@ -283,9 +283,17 @@ public class Unit : WorldObject
         }
         if (Time.unscaledTime - _attackTime > _selectedWeapon.AttackDelay)
         {
-            var v = AngleToTarget;
             UseWeaponAnim();
-            float range = (_selectedWeapon.AttackWeaponType == WeaponType.Musket) ? Combat.ComputeMissileRange(_attackTarget.transform.position,transform.position, false) : 0.0f;
+            float range;
+            if (_selectedWeapon.AttackWeaponType == WeaponType.Musket)
+            {
+                range = Combat.ComputeMissileRange(GetTargetingPosition(_selectedWeapon),
+                                                   GetTargetingEnemyPosition(_attackTarget, _selectedWeapon), false);
+            }
+            else
+            {
+                range = 0.0f;
+            }
             if (Combat.Hit(_selectedWeapon, _attackTarget.Defenses, range))
             {
                 switch (_selectedWeapon.AttackWeaponType)
