@@ -1877,7 +1877,7 @@ MonoBehaviour:
   RunSpeed: 0.08
   ContainingFormation: {fileID: 0}
   IsMissileUnit: 0
-  SelectionMarkerRadius: 0
+  SelectionMarkerRadius: 0.5
   animator: {fileID: 95651626834592804}
   InfType: 2
 --- !u!114 &114540309309968604
