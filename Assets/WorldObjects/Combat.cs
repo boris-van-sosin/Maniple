@@ -39,7 +39,7 @@ public class Weapon
         return new Weapon()
         {
             AttackWeaponType = WeaponType.Musket,
-            Skill = 0.15f,
+            Skill = 0.05f,
             MinRange = 4.0f,
             MaxRange = 30.0f,
             AttackDelay = 10.0f
