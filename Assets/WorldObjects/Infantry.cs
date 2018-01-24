@@ -28,7 +28,7 @@ public class Infantry : Unit
             case InfantryType.Pikeman:
                 animator.SetInteger("WeaponState", 7);
                 _weapons = new Weapon[] { Weapon.BasicPike(), Weapon.BasicSword() };
-                Defenses = new Defense(0.45f, 0.35f, 0.20f, 0.50f);
+                Defenses = new Defense(0.45f, 0.35f, 0.25f, 0.50f);
                 break;
             case InfantryType.Musketeer:
                 animator.SetInteger("WeaponState", 6);
@@ -79,12 +79,14 @@ public class Infantry : Unit
         {
             animator.SetBool("NonCombat", true);
             animator.SetBool("Idling", false);
+            animator.speed = 1.7f / 1.5f;
             
         }
         else
         {
             animator.SetBool("Idling", true);
             animator.SetBool("NonCombat", !_inCombat);
+            animator.speed = 1.0f;
         }
     }
 

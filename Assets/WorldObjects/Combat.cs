@@ -118,7 +118,7 @@ public static class Combat
             float t = (range - attackingWeapon.MinRange) / (attackingWeapon.MaxRange - attackingWeapon.MinRange);
             // Bezier curve for hit chance. Starts at 0.95 at point blank, ends at 0.05 at max range, and the middle
             // control point is determined by the weapon skill.
-            float hitChance = MaxHitChance * (1 - t) * (1 - t) + attackingWeapon.Skill * 2 * t * (1 - t) + MinHitChance * t * t;
+            float hitChance = MaxMissileHitChance * (1 - t) * (1 - t) + attackingWeapon.Skill * 2 * t * (1 - t) + MinMissileHitChance * t * t;
             float hitRoll = Random.value;
             if (hitRoll > hitChance)
             {
@@ -137,7 +137,7 @@ public static class Combat
         {
             float attackerDifference = attackingWeapon.Skill - defenseValue;
             // Generalized logistic 
-            float hitChance = MinHitChance + (MaxHitChance - MinHitChance) / (1 + Mathf.Exp(-LogisticSteepness*attackerDifference));
+            float hitChance = MinMeleeHitChance + (MaxMeleeHitChance - MinMeleeHitChance) / (1 + Mathf.Exp(-LogisticSteepness*attackerDifference));
             float hitRoll = Random.value;
             Debug.Log(string.Format("Meele attack at distance {0}. Attacker: {1}. Defender: {2}. Chance to hit: {3}. Roll: {4}.", range, attackingWeapon.Skill, defenseValue, hitChance, hitRoll));
             return hitRoll < hitChance;
@@ -168,8 +168,10 @@ public static class Combat
     }
 
 
-    private static readonly float MinHitChance = 0.05f;
-    private static readonly float MaxHitChance = 0.95f;
+    private static readonly float MinMeleeHitChance = 0.05f;
+    private static readonly float MaxMeleeHitChance = 0.95f;
+    private static readonly float MinMissileHitChance = 0.05f;
+    private static readonly float MaxMissileHitChance = 0.95f;
     private static readonly float MusketResistClamp = 0.95f;
     private static readonly float LogisticSteepness = 10.0f;
 }
