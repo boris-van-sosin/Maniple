@@ -51,9 +51,42 @@ public class WorldObject : MonoBehaviour {
         IssueOrder(target, null, controller);
     }
 
-    public virtual void IssueOrder(ClickHitObject target, ClickHitObject rClickStart, Player controller)
+    public void IssueOrder(ClickHitObject target, ClickHitObject rClickStart, Player controller)
+    {
+        _orderQueue.Clear();
+        InnerIssueOrder(target, rClickStart, controller);
+    }
+
+    protected virtual void InnerIssueOrder(ClickHitObject target, ClickHitObject rClickStart, Player controller)
     {
     }
+
+    public void NextOrderFromQueue()
+    {
+        if (HasQueuedOrders)
+        {
+            PerformOrderFromQueue(_orderQueue.Peek());
+        }
+    }
+
+    public virtual void PerformOrderFromQueue(Order o)
+    {
+        if (o.OrdType == OrderType.Move)
+        {
+            InnerIssueOrder(o.HitObj, o.RClickStart, _owner);
+        }
+    }
+
+    public void EnqueueOrder(Order o)
+    {
+        _orderQueue.Enqueue(o);
+        if (_orderQueue.Count == 1)
+        {
+            PerformOrderFromQueue(o);
+        }
+    }
+
+    public bool HasQueuedOrders { get { return _orderQueue.Count > 0; } }
 
     public virtual string[] GetActions()
     {
@@ -100,18 +133,34 @@ public class WorldObject : MonoBehaviour {
 
     public Texture2D CardImage;
 
-    /*public Texture2D Texture
+    protected Queue<Order> _orderQueue = new Queue<Order>();
+
+    public enum OrderType { Move, Reinforce };
+
+    public struct Order
     {
-        get
+        public OrderType OrdType;
+        public ClickHitObject HitObj;
+        public ClickHitObject RClickStart;
+
+        public static Order MoveOrder(ClickHitObject hitObj, ClickHitObject rClickStart)
         {
-            return _texture;
+            return new Order()
+            {
+                OrdType = OrderType.Move,
+                HitObj = hitObj,
+                RClickStart = rClickStart
+            };
         }
-
-        set
+        
+        public static Order ReinforceOrder()
         {
-            _texture = value;
+            return new Order()
+            {
+                OrdType = OrderType.Reinforce,
+                HitObj = null,
+                RClickStart = null
+            };
         }
-    }*/
-
-
+    }
 }

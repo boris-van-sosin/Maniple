@@ -125,6 +125,35 @@ public class Formation : WorldObject
         _targetMarkerRenderer = GetComponent<LineRenderer>();
         StartCoroutine(PeriodicForcePosition());
         StartCoroutine(PeriodicDetectEnemy());
+        StartCoroutine(AdvanceOrdersQueue());
+    }
+
+    private IEnumerator AdvanceOrdersQueue()
+    {
+        while (true)
+        {
+            if (HasQueuedOrders)
+            {
+                if (!_issuedOrder && !_leaderNavAgent.enabled)
+                {
+                    bool inCombat = false;
+                    foreach (Unit u in GetUnits())
+                    {
+                        if (u.IsAttacking)
+                        {
+                            inCombat = true;
+                            break;
+                        }
+                    }
+                    if (!inCombat && _orderQueue.Peek().OrdType == OrderType.Move)
+                    {
+                        _orderQueue.Dequeue();
+                        NextOrderFromQueue();
+                    }
+                }
+            }
+            yield return new WaitForSeconds(10.0f);
+        }
     }
 
     // Update is called once per frame
@@ -155,6 +184,17 @@ public class Formation : WorldObject
                     {
                         MeleePushStep(2.0f + NominalMeleeRange);
                         StartCoroutine(MeleePushBehavior());
+                    }
+                }
+                else
+                {
+                    if (HasQueuedOrders)
+                    {
+                        if (_orderQueue.Peek().OrdType == OrderType.Move)
+                        {
+                            _orderQueue.Dequeue();
+                            NextOrderFromQueue();
+                        }
                     }
                 }
             }
@@ -470,14 +510,14 @@ public class Formation : WorldObject
         }
     }
 
-    public override void IssueOrder(ClickHitObject target, ClickHitObject rClickStart, Player controller)
+    protected override void InnerIssueOrder(ClickHitObject target, ClickHitObject rClickStart, Player controller)
     {
-        base.IssueOrder(target, rClickStart, controller);
+        base.InnerIssueOrder(target, rClickStart, controller);
         if (_owner == controller)
         {
             if (target != null)
             {
-                Unit targetUnit = target.HitObject.GetComponent<Unit>();
+                Unit targetUnit = (target.HitObject != null) ? target.HitObject.GetComponent<Unit>() : null;
                 if (targetUnit == null || !_owner.IsHostile(targetUnit.Owner))
                 {
                     // Move order
@@ -496,6 +536,7 @@ public class Formation : WorldObject
                         _issuedOrder = true;
                         _rotateAtTarget = true;
                     }
+                    _attackTargetFormation = null;
                 }
                 else
                 {
@@ -843,6 +884,12 @@ public class Formation : WorldObject
     public override void PerformAction(string action)
     {
         base.PerformAction(action);
+        _orderQueue.Clear();
+        InnerPerformAction(action);
+    }
+
+    private void InnerPerformAction(string action)
+    {
         if (action == ReinforceAction)
         {
             TownCenterBuilding[] allTownCenters = FindObjectsOfType<TownCenterBuilding>();
@@ -871,6 +918,28 @@ public class Formation : WorldObject
             foreach (Unit u in GetUnits())
             {
                 u.StopMovingAndAttacking();
+            }
+        }
+    }
+
+    public override void PerformOrderFromQueue(Order o)
+    {
+        base.PerformOrderFromQueue(o);
+        if (o.OrdType == OrderType.Reinforce)
+        {
+            InnerPerformAction(ReinforceAction);
+        }
+    }
+
+    public void FinishForming()
+    {
+        Forming = false;
+        if (HasQueuedOrders)
+        {
+            if (_orderQueue.Peek().OrdType == OrderType.Reinforce)
+            {
+                _orderQueue.Dequeue();
+                NextOrderFromQueue();
             }
         }
     }
@@ -911,7 +980,6 @@ public class Formation : WorldObject
     protected List<Unit> _meleeUnits;
     protected List<Unit> _missileUnits;
     protected Vector3 _centerOfMass;
-    protected bool _forming;
     protected GameObject _virtualLeader;
     private NavMeshAgent _leaderNavAgent;
     protected float _forceFormationTime;

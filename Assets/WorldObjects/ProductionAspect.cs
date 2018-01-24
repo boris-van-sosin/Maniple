@@ -84,7 +84,7 @@ public class ProductionAspect
             case ProductionItemType.ProductionItemFinalizeFormation:
                 if (item.TargetFormation != null)
                 {
-                    item.TargetFormation.Forming = false;
+                    item.TargetFormation.FinishForming();
                     OnFormationFinalize(item.TargetFormation);
                 }
                 break;

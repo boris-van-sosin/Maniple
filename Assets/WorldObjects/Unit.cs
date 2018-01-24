@@ -119,7 +119,7 @@ public class Unit : WorldObject
         base.MouseClick(hitObject, controller);
     }
 
-    public override void IssueOrder(ClickHitObject target, ClickHitObject rClickStart, Player controller)
+    protected override void InnerIssueOrder(ClickHitObject target, ClickHitObject rClickStart, Player controller)
     {
         if (_dying)
         {
@@ -127,6 +127,7 @@ public class Unit : WorldObject
         }
         if (_owner != null && _owner.Human && _selected && target != null)
         {
+            _orderQueue.Clear();
             Unit targetWO = target.HitObject.GetComponent<Unit>();
             if (_weapons != null && _weapons.Length > 0 && targetWO != null && _owner.IsHostile(targetWO._owner))
             {
@@ -333,6 +334,11 @@ public class Unit : WorldObject
     {
         _dying = true;
         _selectionMarkerRenderer.enabled = false;
+        Collider c = GetComponent<Collider>();
+        if (c != null)
+        {
+            c.enabled = false;
+        }
         if (ContainingFormation != null)
         {
             ContainingFormation.RemoveUnit(this);

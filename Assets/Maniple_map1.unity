@@ -3273,7 +3273,7 @@ MonoBehaviour:
   DisplayName: Camp
   CardImage: {fileID: 2800000, guid: f45ef039e80233d40a2d838d3813ddad, type: 3}
   CaptureRange: 12
-  ResourcesPerTick: 10
+  ResourcesPerTick: 100
 --- !u!1001 &488676166
 Prefab:
   m_ObjectHideFlags: 0
@@ -12232,7 +12232,7 @@ MonoBehaviour:
   DisplayName: Camp
   CardImage: {fileID: 2800000, guid: f45ef039e80233d40a2d838d3813ddad, type: 3}
   CaptureRange: 12
-  ResourcesPerTick: 10
+  ResourcesPerTick: 100
 --- !u!1001 &2116058288
 Prefab:
   m_ObjectHideFlags: 0

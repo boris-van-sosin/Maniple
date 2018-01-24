@@ -96,11 +96,6 @@ public class Infantry : Unit
         //animator.SetTrigger("Use");
     }
 
-    public override void IssueOrder(ClickHitObject target, ClickHitObject rClickStart, Player controller)
-    {
-        base.IssueOrder(target, controller);
-    }
-
     public IEnumerator DelayedDeath(float delay)
     {
         Debug.Log("In DeathAnim");

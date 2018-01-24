@@ -99,11 +99,6 @@ public class TownCenterBuilding : Building
         base.DeSelectThis();
     }
 
-    public override void IssueOrder(ClickHitObject target, ClickHitObject rClickStart, Player controller)
-    {
-        base.IssueOrder(target, controller);
-    }
-
     public override void MouseClick(ClickHitObject hitObject, Player controller)
     {
         base.MouseClick(hitObject, controller);
