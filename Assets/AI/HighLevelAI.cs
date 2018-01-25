@@ -224,26 +224,44 @@ public class HighLevelAI : MonoBehaviour {
         }
     }
 
-    public void AddTown(TownCenterBuilding b)
+    public void AddTown(TownCenterBuilding tc)
     {
-        _ownedTowns.Add(b);
-        _townDefenseForces.Add(b, new List<Formation>());
-        _townDefenseRequiredForces.Add(b, _requiredTownDefenseForces);
-        _townProducedFormationTargets.Add(b, new Queue<ProducedFormationTarget>());
-        b.OnFormationCreate += FormationCreated;
-        b.OnFormationFinalize += FormationFinalized;
+        _ownedTowns.Add(tc);
+        if (_ownedTowns.Count > 1)
+        {
+            _firstTown = false;
+        }
+        _townDefenseForces.Add(tc, new List<Formation>());
+        if (_firstTown)
+        {
+            _townDefenseRequiredForces[tc] = _requiredTownDefenseForcesInitial;
+        }
+        else
+        {
+            _townDefenseRequiredForces[tc] = _requiredTownDefenseForces;
+        }
+        _townProducedFormationTargets.Add(tc, new Queue<ProducedFormationTarget>());
+        tc.OnFormationCreate += FormationCreated;
+        tc.OnFormationFinalize += FormationFinalized;
         AdjustTownDefenseLocations();
+        if (!_firstTown)
+        {
+            foreach (TownCenterBuilding tc2 in FriendlyFrontTowns())
+            {
+                _townDefenseRequiredForces[tc2] = _requiredTownDefenseForces;
+            }
+        }
     }
 
-    public void RemoveTown(TownCenterBuilding b)
+    public void RemoveTown(TownCenterBuilding tc)
     {
-        _ownedTowns.Remove(b);
-        _townDefenseForces.Remove(b);
-        _townDefenseRequiredForces.Remove(b);
-        _townProducedFormationTargets.Remove(b);
-        _townDefenseLocations.Remove(b);
-        b.OnFormationCreate -= FormationCreated;
-        b.OnFormationFinalize -= FormationFinalized;
+        _ownedTowns.Remove(tc);
+        _townDefenseForces.Remove(tc);
+        _townDefenseRequiredForces.Remove(tc);
+        _townProducedFormationTargets.Remove(tc);
+        _townDefenseLocations.Remove(tc);
+        tc.OnFormationCreate -= FormationCreated;
+        tc.OnFormationFinalize -= FormationFinalized;
     }
 
     private void FormationCreated(TownCenterBuilding tc, Formation f)
@@ -304,7 +322,6 @@ public class HighLevelAI : MonoBehaviour {
             res += MoveOnPath(dest.Value, _defenseDistance);
             ++destNum;
         }
-        Debug.DrawLine(tc.ControlCircleCenter.position, res / destNum, Color.grey, 600.0f);
         Vector3 defensePt = res / destNum;
         Vector3 defenseDir = Quaternion.AngleAxis(90, Vector3.up) * (defensePt - tc.ControlCircleCenter.position).normalized;
         return Tuple<Vector3, Vector3>.Create(defensePt, defenseDir);
@@ -632,10 +649,12 @@ public class HighLevelAI : MonoBehaviour {
     private static readonly int _adjustForcesLocationPulses = 10;
     private int _adjustForcesLocationCounter = _adjustForcesLocationPulses;
 
-
     private int _wallsLayerMask;
 
     private int _requiredTownDefenseForces = 20 * 3;
+    private int _requiredTownDefenseForcesInitial = 20 * 1;
+    private int _requiredTownDefenseForcesFront = 20 * 4;
+    private bool _firstTown = true;
 
     public enum AIPlayerState
     {

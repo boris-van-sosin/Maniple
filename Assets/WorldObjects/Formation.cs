@@ -145,14 +145,13 @@ public class Formation : WorldObject
                             break;
                         }
                     }
-                    if (!inCombat && _orderQueue.Peek().OrdType == OrderType.Move)
+                    if (!inCombat)
                     {
-                        _orderQueue.Dequeue();
-                        NextOrderFromQueue();
+                        FinishQueuedMoveOrder();
                     }
                 }
             }
-            yield return new WaitForSeconds(10.0f);
+            yield return new WaitForSeconds(2.0f);
         }
     }
 
@@ -188,14 +187,7 @@ public class Formation : WorldObject
                 }
                 else
                 {
-                    if (HasQueuedOrders)
-                    {
-                        if (_orderQueue.Peek().OrdType == OrderType.Move)
-                        {
-                            _orderQueue.Dequeue();
-                            NextOrderFromQueue();
-                        }
-                    }
+                    FinishQueuedMoveOrder();
                 }
             }
         }
@@ -525,6 +517,12 @@ public class Formation : WorldObject
                     {
                         _leaderNavAgent.enabled = true;
                         _leaderNavAgent.SetDestination(target.HitLocation);
+                        if ((_leaderNavAgent.destination - _leaderNavAgent.transform.position).sqrMagnitude <= _leaderNavAgent.stoppingDistance * _leaderNavAgent.stoppingDistance)
+                        {
+                            _leaderNavAgent.enabled = false;
+                            FinishQueuedMoveOrder();
+                            return;
+                        }
                         _issuedOrder = true;
                         _rotateAtTarget = false;
                     }
@@ -533,6 +531,13 @@ public class Formation : WorldObject
                         _targetRotation = Quaternion.LookRotation(target.HitLocation - rClickStart.HitLocation);
                         _leaderNavAgent.enabled = true;
                         _leaderNavAgent.SetDestination(rClickStart.HitLocation);
+                        if ((_leaderNavAgent.destination - _leaderNavAgent.transform.position).sqrMagnitude <= _leaderNavAgent.stoppingDistance * _leaderNavAgent.stoppingDistance)
+                        {
+                            _leaderNavAgent.enabled = false;
+                            _virtualLeader.transform.rotation = _targetRotation;
+                            FinishQueuedMoveOrder();
+                            return;
+                        }
                         _issuedOrder = true;
                         _rotateAtTarget = true;
                     }
@@ -563,6 +568,18 @@ public class Formation : WorldObject
                 }
                 //DrawLineToTarget(_leaderNavAgent.destination);
                 StartCoroutine(DelayedRemoveTargetLine());
+            }
+        }
+    }
+
+    private void FinishQueuedMoveOrder()
+    {
+        if (HasQueuedOrders)
+        {
+            if (_orderQueue.Peek().OrdType == OrderType.Move)
+            {
+                _orderQueue.Dequeue();
+                NextOrderFromQueue();
             }
         }
     }
