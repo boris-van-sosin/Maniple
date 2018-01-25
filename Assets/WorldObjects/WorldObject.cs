@@ -12,7 +12,7 @@ public class WorldObject : MonoBehaviour {
     protected virtual void Start()
     {
         _unitsLayerMask = LayerMask.GetMask("Units");
-        _LOSObstacleLayerMask = LayerMask.GetMask("Default", "Walls");
+        _LOSObstacleLayerMask = LayerMask.GetMask("Default", "Walls", "Terrain");
         _owner = transform.root.GetComponentInChildren<Player>();
         _selectionMarkerRenderer = GetComponent<LineRenderer>();
     }
