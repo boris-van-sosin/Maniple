@@ -581,9 +581,9 @@ public class Formation : WorldObject
     {
         if (HasQueuedOrders)
         {
-            if (_orderQueue.Peek().OrdType == OrderType.Move)
+            if (_orderQueue.First.Value.OrdType == OrderType.Move)
             {
-                _orderQueue.Dequeue();
+                _orderQueue.RemoveFirst();
                 NextOrderFromQueue();
             }
         }
@@ -958,9 +958,9 @@ public class Formation : WorldObject
         Forming = false;
         if (HasQueuedOrders)
         {
-            if (_orderQueue.Peek().OrdType == OrderType.Reinforce)
+            if (_orderQueue.First.Value.OrdType == OrderType.Reinforce)
             {
-                _orderQueue.Dequeue();
+                _orderQueue.RemoveFirst();
                 NextOrderFromQueue();
             }
         }

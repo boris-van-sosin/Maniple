@@ -65,7 +65,7 @@ public class WorldObject : MonoBehaviour {
     {
         if (HasQueuedOrders)
         {
-            PerformOrderFromQueue(_orderQueue.Peek());
+            PerformOrderFromQueue(_orderQueue.First.Value);
         }
     }
 
@@ -79,7 +79,7 @@ public class WorldObject : MonoBehaviour {
 
     public void EnqueueOrder(Order o)
     {
-        _orderQueue.Enqueue(o);
+        _orderQueue.AddLast(o);
         if (_orderQueue.Count == 1)
         {
             PerformOrderFromQueue(o);
@@ -133,7 +133,7 @@ public class WorldObject : MonoBehaviour {
 
     public Texture2D CardImage;
 
-    protected Queue<Order> _orderQueue = new Queue<Order>();
+    protected LinkedList<Order> _orderQueue = new LinkedList<Order>();
 
     public enum OrderType { Move, Reinforce };
 
