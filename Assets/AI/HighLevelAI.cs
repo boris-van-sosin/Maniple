@@ -587,10 +587,21 @@ public class HighLevelAI : MonoBehaviour {
 
     private void StartAttack()
     {
-        Vector3 attackVecor = _attackTarget.ControlCircleCenter.position - _attackForceLocation;
+        Vector3 attackVector = Vector3.zero;
+        bool leadCompany = true;
         foreach (Formation f in _attackForce)
         {
-            Vector3 targetLocation = ClosestPtOnNavMesh(_forcesLocations[f] + attackVecor);
+            Vector3 targetLocation;
+            if (leadCompany)
+            {
+                targetLocation = _attackTarget.ControlCircleCenter.position;
+                attackVector = targetLocation - _forcesLocations[f];
+                leadCompany = false;
+            }
+            else
+            {
+                targetLocation = ClosestPtOnNavMesh(_forcesLocations[f] + attackVector);
+            }
             ClickHitObject target = new ClickHitObject()
             {
                 HitLocation = targetLocation,

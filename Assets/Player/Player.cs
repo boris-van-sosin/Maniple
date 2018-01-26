@@ -67,6 +67,10 @@ public class Player : MonoBehaviour
     public void AddResource(GameResources.ResourceType res, int amount)
     {
         _playerResources[res] += amount;
+        if (_playerResources[res] > _playerResourceLimits[res])
+        {
+            _playerResources[res] = _playerResourceLimits[res];
+        }
     }
 
     public void IncMaxResource(GameResources.ResourceType res, int amount)

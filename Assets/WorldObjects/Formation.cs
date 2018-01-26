@@ -431,7 +431,7 @@ public class Formation : WorldObject
 
     private void CheckWallBehavior()
     {
-        Collider[] walls = Physics.OverlapSphere(_virtualLeader.transform.position, 0.2f, _wallsLayerMask);
+        Collider[] walls = Physics.OverlapSphere(_virtualLeader.transform.position, 0.4f, _wallsLayerMask);
         if (walls.Length > 0)
         {
             Transform wallAlignMarker = null;

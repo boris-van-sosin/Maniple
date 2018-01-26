@@ -16,6 +16,10 @@ public class Weapon
     public bool InRange(Vector3 attacker, Vector3 target)
     {
         Vector3 direction = target - attacker;
+        if (IsMelee && direction.y > 1.0f)
+        {
+            return false;
+        }
         float range = (AttackWeaponType == WeaponType.Musket) ? Combat.ComputeMissileRange(attacker, target) : direction.sqrMagnitude;
         if (range <= MaxRange * MaxRange &&
             range >= MinRange * MinRange)
