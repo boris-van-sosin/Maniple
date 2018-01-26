@@ -110,7 +110,7 @@ public class Formation : WorldObject
         _maxDrift = 6.0f * 6.0f;
         _unitDriftThreshold = 1.5f * 1.5f;
 
-        _wallsLayerMask = LayerMask.GetMask("Walls");
+        _wallsLayerMask = LayerMask.GetMask("Walls", "WallsInvisible");
     }
 
     // Use this for initialization
@@ -665,7 +665,7 @@ public class Formation : WorldObject
     private void DestroyFormation()
     {
         transform.parent.parent = null;
-        _owner.ForceUpdateForces();
+        _owner.RemoveCompany(this);
         Destroy(transform.parent.gameObject);
     }
 

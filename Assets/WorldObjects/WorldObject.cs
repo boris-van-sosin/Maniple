@@ -86,6 +86,12 @@ public class WorldObject : MonoBehaviour {
         }
     }
 
+    public void PushInterruptiveOrder(Order o)
+    {
+        _orderQueue.AddFirst(o);
+        PerformOrderFromQueue(o);
+    }
+
     public bool HasQueuedOrders { get { return _orderQueue.Count > 0; } }
 
     public virtual string[] GetActions()

@@ -129,7 +129,7 @@ namespace Maniple
         {
             return new Dictionary<ResourceType, int>()
                 {
-                    { ResourceType.Money, 100000 }
+                    { ResourceType.Money, 10000 }
                 };
         }
 
@@ -137,7 +137,7 @@ namespace Maniple
         {
             return new Dictionary<ResourceType, int>()
                 {
-                    { ResourceType.Money, 2000 }
+                    { ResourceType.Money, 200 * 25 }
                 };
         }
 

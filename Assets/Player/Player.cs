@@ -94,6 +94,15 @@ public class Player : MonoBehaviour
         return newCompany.GetComponent<CompanyObject>();
     }
 
+    public void RemoveCompany(Formation f)
+    {
+        if (AI != null)
+        {
+            AI.RemoveFormation(f);
+        }
+        ForceUpdateForces();
+    }
+
     private void UpdateForces(Transform unitsList)
     {
         if (Human)

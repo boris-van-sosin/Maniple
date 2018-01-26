@@ -9,7 +9,8 @@ public class HighLevelAI : MonoBehaviour {
 
     void Awake()
     {
-        _wallsLayerMask = LayerMask.GetMask("Walls");
+        _wallsLayerMask = LayerMask.GetMask("Walls", "WallsInvisible");
+        _unitsLayerMask = LayerMask.GetMask("Units");
         _player = GetComponent<Player>();
     }
 
@@ -135,6 +136,8 @@ public class HighLevelAI : MonoBehaviour {
         }
 
         _attackForce.Add(f);
+
+        _forcesLocations.Add(f, Vector3.zero);
     }
 
     private void RequisionFormation()
@@ -143,16 +146,16 @@ public class HighLevelAI : MonoBehaviour {
         // find towns which needs defenses:
         TownCenterBuilding townWithMostReqForces = null;
         int missingInTownWithMostReqForces = 0;
-        foreach (TownCenterBuilding b in _ownedTowns)
+        foreach (TownCenterBuilding tc in _ownedTowns)
         {
-            if (b.IsProducing)
+            if (tc.IsProducing)
             {
                 continue;
             }
-            int missingForces = _townDefenseRequiredForces[b] - EstimateForce(_townDefenseForces[b]);
+            int missingForces = _townDefenseRequiredForces[tc] - EstimateForce(_townDefenseForces[tc]);
             if (townWithMostReqForces == null || missingForces > missingInTownWithMostReqForces)
             {
-                townWithMostReqForces = b;
+                townWithMostReqForces = tc;
                 missingInTownWithMostReqForces = missingForces;
             }
         }
@@ -172,14 +175,40 @@ public class HighLevelAI : MonoBehaviour {
         int missingReserveForces = _reserveRequiredForce - EstimateForce(_reserveForce);
         if (missingReserveForces > 0)
         {
-            //_reserveForce.Add(f);
+            TownCenterBuilding reserveTC = ClosestTownCenterToPoint(_ownedTowns, _reserveForceLocation);
+            if (reserveTC != null && !reserveTC.IsProducing)
+            {
+                reserveTC.PerformAction(RequiredFormationType(_reserveForce));
+                _townProducedFormationTargets[reserveTC].Enqueue(
+                    new ProducedFormationTarget()
+                    {
+                        TargetForceType = ForceType.Reserve
+                    });
+                return;
+            }
         }
 
-        //_attackForce.Add(f);
+        // check if reserve requires reinforcement
+        int missingAttackForces = _attackRequiredForce - EstimateForce(_attackForce);
+        if (missingAttackForces > 0)
+        {
+            TownCenterBuilding attackTC = ClosestTownCenterToPoint(_ownedTowns, _attackForceLocation);
+            if (attackTC != null && !attackTC.IsProducing)
+            {
+                attackTC.PerformAction(RequiredFormationType(_reserveForce));
+                _townProducedFormationTargets[attackTC].Enqueue(
+                    new ProducedFormationTarget()
+                    {
+                        TargetForceType = ForceType.Attack
+                    });
+                return;
+            }
+        }
     }
 
     public void RemoveFormation(Formation f)
     {
+        _forcesLocations.Remove(f);
         foreach (List<Formation> townDefenses in _townDefenseForces.Values)
         {
             if (townDefenses.Contains(f))
@@ -281,6 +310,7 @@ public class HighLevelAI : MonoBehaviour {
             default:
                 break;
         }
+        _forcesLocations.Add(f, Vector3.zero);
     }
 
     private void FormationFinalized(TownCenterBuilding tc, Formation f)
@@ -398,7 +428,7 @@ public class HighLevelAI : MonoBehaviour {
     private IEnumerable<TownCenterBuilding> FriendlyFrontTowns()
     {
         HashSet<TownCenterBuilding> res = new HashSet<TownCenterBuilding>();
-        foreach (TownCenterBuilding tc1 in _allTowns.Where(x => x.Owner != _player))
+        foreach (TownCenterBuilding tc1 in _allTowns.Where(x => _player.IsHostile(x.Owner)))
         {
             TownCenterBuilding tc2 = ClosestTownCenterToPoint(_ownedTowns, tc1.ControlCircleCenter.position);
             if (tc2 != null)
@@ -411,10 +441,19 @@ public class HighLevelAI : MonoBehaviour {
 
     private IEnumerable<TownCenterBuilding> EnemyFrontTowns()
     {
+        return EnemyFrontTowns(false);
+    }
+
+    private IEnumerable<TownCenterBuilding> EnemyFrontTowns(bool includeNeutral)
+    {
         HashSet<TownCenterBuilding> res = new HashSet<TownCenterBuilding>();
         foreach (TownCenterBuilding tc1 in _ownedTowns)
         {
-            TownCenterBuilding tc2 = ClosestTownCenterToPoint(_allTowns.Where(x => x.Owner != _player), tc1.ControlCircleCenter.position);
+            TownCenterBuilding tc2 =
+                ClosestTownCenterToPoint(_allTowns.Where(
+                                            x => (includeNeutral && x.Owner == null) ||
+                                            _player.IsHostile(x.Owner)),
+                                         tc1.ControlCircleCenter.position);
             if (tc2 != null)
             {
                 res.Add(tc2);
@@ -459,8 +498,9 @@ public class HighLevelAI : MonoBehaviour {
                     HitLocation = _townDefenseLocations[tc].Item1 + defenseLineAxis * offset + defemseLineDepth,
                     HitObject = null
                 };
-                if (!f.HasQueuedOrders && (f.transform.position - target.HitLocation).sqrMagnitude > 0.1f * 0.1f)
+                if (!f.HasQueuedOrders && !f.Forming && (f.transform.position - target.HitLocation).sqrMagnitude > 0.1f * 0.1f)
                 {
+                    _forcesLocations[f] = target.HitLocation;
                     f.EnqueueOrder(WorldObject.Order.MoveOrder(dir, target));
                 }
                 offset += _formationWidth + _formation_padding;
@@ -490,6 +530,7 @@ public class HighLevelAI : MonoBehaviour {
         Vector3 frontAxis = Quaternion.AngleAxis(90, Vector3.up) * frontDirection;
         yield return new WaitForEndOfFrame();
 
+        _reserveForceLocation = reserveLocation;
         offset = 0.0f;
         foreach (Formation f in _reserveForce)
         {
@@ -498,14 +539,16 @@ public class HighLevelAI : MonoBehaviour {
                 HitLocation = ClosestPtOnNavMesh(reserveLocation + frontAxis * offset),
                 HitObject = null
             };
-            if (!f.HasQueuedOrders && (f.transform.position - target.HitLocation).sqrMagnitude > 0.1f * 0.1f)
+            if (!f.HasQueuedOrders && !f.Forming && (f.transform.position - target.HitLocation).sqrMagnitude > 0.1f * 0.1f)
             {
+                _forcesLocations[f] = target.HitLocation;
                 f.EnqueueOrder(WorldObject.Order.MoveOrder(target, null));
             }
             offset += _formationWidth + _formation_padding;
             yield return new WaitForEndOfFrame();
         }
 
+        _attackForceLocation = reserveLocation;
         offset = 0.0f;
         foreach (Formation f in _attackForce)
         {
@@ -514,8 +557,9 @@ public class HighLevelAI : MonoBehaviour {
                 HitLocation = ClosestPtOnNavMesh(reserveLocation + frontAxis * offset + frontDirection * _formationDepth),
                 HitObject = null
             };
-            if (!f.HasQueuedOrders && (f.transform.position - target.HitLocation).sqrMagnitude > 0.1f * 0.1f)
+            if (!f.HasQueuedOrders && !f.Forming && (f.transform.position - target.HitLocation).sqrMagnitude > 0.1f * 0.1f)
             {
+                _forcesLocations[f] = target.HitLocation;
                 f.EnqueueOrder(WorldObject.Order.MoveOrder(target, null));
             }
             offset += _formationWidth + _formation_padding;
@@ -536,6 +580,58 @@ public class HighLevelAI : MonoBehaviour {
         return pt;
     }
 
+    private bool DecideStartAttack()
+    {
+        return _attackTarget != null && _attackRequiredForce <= EstimateForce(_attackForce) && _attackForce.All(x => !x.Forming);
+    }
+
+    private void StartAttack()
+    {
+        Vector3 attackVecor = _attackTarget.ControlCircleCenter.position - _attackForceLocation;
+        foreach (Formation f in _attackForce)
+        {
+            Vector3 targetLocation = ClosestPtOnNavMesh(_forcesLocations[f] + attackVecor);
+            ClickHitObject target = new ClickHitObject()
+            {
+                HitLocation = targetLocation,
+                HitObject = null
+            };
+            if ((f.transform.position - target.HitLocation).sqrMagnitude > 0.1f * 0.1f)
+            {
+                _forcesLocations[f] = targetLocation;
+                f.EnqueueOrder(WorldObject.Order.MoveOrder(target, null));
+            }
+        }
+    }
+
+    private IEnumerator SetAttackTarget()
+    {
+        TownCenterBuilding leastDefendedTown = null;
+        int leastDefenses = 0;
+        foreach (TownCenterBuilding tc in EnemyFrontTowns(true))
+        {
+            HashSet<Formation> enemyDefenses = new HashSet<Formation>();
+            Collider[] unitsAtTarget = Physics.OverlapSphere(tc.ControlCircleCenter.position, _defenseDistance, _unitsLayerMask);
+            foreach (Collider c in unitsAtTarget)
+            {
+                Formation f = c.GetComponent<Formation>();
+                if (f != null && _player.IsHostile(f.Owner))
+                {
+                    enemyDefenses.Add(f);
+                }
+            }
+            int defensesAtTC = EstimateForce(enemyDefenses);
+            if (leastDefendedTown == null || defensesAtTC < leastDefenses)
+            {
+                leastDefendedTown = tc;
+                leastDefenses = defensesAtTC;
+            }
+            yield return new WaitForEndOfFrame();
+        }
+        _attackTarget = leastDefendedTown;
+        yield return null;
+    }
+
     private AIPlayerState HandleBuildup()
     {
         if (_reinforceCounter > 0)
@@ -548,11 +644,28 @@ public class HighLevelAI : MonoBehaviour {
             _reinforceCounter = _reinforcePulses;
         }
         RequisionFormation();
+        StartCoroutine(SetAttackTarget());
+
+        if (DecideStartAttack())
+        {
+            StartAttack();
+            return AIPlayerState.Attacking;
+        }
         return AIPlayerState.Buildup;
     }
 
     private AIPlayerState HandleAttacking()
     {
+        if (_attackForce.Count == 0)
+        {
+            _attackTarget = null;
+            return AIPlayerState.AttackFail;
+        }
+        else if (_attackTarget.Owner == _player)
+        {
+            _attackTarget = null;
+            return AIPlayerState.AttackSuccess;
+        }
         return AIPlayerState.Attacking;
     }
 
@@ -563,11 +676,13 @@ public class HighLevelAI : MonoBehaviour {
 
     private AIPlayerState HandleAttackSuccess()
     {
+        return AIPlayerState.Buildup; // temporary
         return AIPlayerState.AttackSuccess;
     }
 
     private AIPlayerState HandleAttackFail()
     {
+        return AIPlayerState.Buildup; // temporary
         return AIPlayerState.AttackFail;
     }
 
@@ -634,6 +749,8 @@ public class HighLevelAI : MonoBehaviour {
     private Dictionary<TownCenterBuilding, Queue<ProducedFormationTarget>> _townProducedFormationTargets = new Dictionary<TownCenterBuilding, Queue<ProducedFormationTarget>>();
     private bool _addedInitialFormation = false;
 
+    private Dictionary<Formation, Vector3> _forcesLocations = new Dictionary<Formation, Vector3>();
+
     private Dictionary<TownCenterBuilding, Dictionary<TownCenterBuilding, NavMeshPath>> _townsGraph;
 
     private TownCenterBuilding _attackTarget = null;
@@ -650,6 +767,7 @@ public class HighLevelAI : MonoBehaviour {
     private int _adjustForcesLocationCounter = _adjustForcesLocationPulses;
 
     private int _wallsLayerMask;
+    private int _unitsLayerMask;
 
     private int _requiredTownDefenseForces = 20 * 3;
     private int _requiredTownDefenseForcesInitial = 20 * 1;
