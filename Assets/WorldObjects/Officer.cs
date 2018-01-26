@@ -13,8 +13,13 @@ public class Officer : Infantry
             Transform beret = transform.Find(BeretPath);
             Renderer r = beret.GetComponent<Renderer>();
             Material[] mtls = r.materials;
-            Material newMtl = new Material(mtls[0]);
-            newMtl.color = owner.TeamColor;
+            Material newMtl;
+            if (!_owner.TryGetTeamColorMaterial("OfficerHatPin", out newMtl))
+            {
+                newMtl = new Material(mtls[0]);
+                newMtl.color = owner.TeamColor;
+                _owner.CacheTeamColorMaterial("OfficerHatPin", newMtl);
+            }
             mtls[0] = newMtl;
             beret.GetComponent<Renderer>().materials = mtls;
         }

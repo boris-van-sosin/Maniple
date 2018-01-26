@@ -13,16 +13,22 @@ public class TeamcolorAspect : MonoBehaviour
     public void SetTeamColor()
     {
         Player owner = transform.root.GetComponent<Player>();
-        Material newMtl = new Material(TeamcolorMaskMaterial);
-        newMtl.color = owner.TeamColor;
+        Material newMtl;
+        if (!owner.TryGetTeamColorMaterial(TeamcolorMaskMaterial.name, out newMtl))
+        {
+            newMtl = new Material(TeamcolorMaskMaterial);
+            newMtl.color = owner.TeamColor;
+            owner.CacheTeamColorMaterial(newMtl.name, newMtl);
+        }
         Renderer r = transform.GetComponent<Renderer>();
+        Material[] mtls = r.materials;
         bool foundMaterial = false;
         for (int i = 0; i < r.materials.Length; ++i)
         {
-            if (r.materials[i].name == newMtl.name)
+            if (mtls[i].name.StartsWith(newMtl.name))
             {
                 foundMaterial = true;
-                r.materials[i] = newMtl;
+                mtls[i] = newMtl;
                 break;
             }
         }
@@ -32,6 +38,10 @@ public class TeamcolorAspect : MonoBehaviour
             r.materials.CopyTo(newMtlsArray, 0);
             newMtlsArray[r.materials.Length] = newMtl;
             r.materials = newMtlsArray;
+        }
+        else
+        {
+            r.materials = mtls;
         }
     }
 

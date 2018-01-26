@@ -117,6 +117,11 @@ public class Formation : WorldObject
     protected override void Start ()
     {
         base.Start();
+        TeamcolorAspect teamcolor = transform.GetComponentInChildren<TeamcolorAspect>();
+        if (teamcolor != null)
+        {
+            teamcolor.SetTeamColor();
+        }
         ComputeCenterOfMass();
         _forceFormationTime = Time.unscaledTime;
         _virtualLeader = transform.parent.gameObject;

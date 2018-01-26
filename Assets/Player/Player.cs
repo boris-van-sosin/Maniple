@@ -169,7 +169,18 @@ public class Player : MonoBehaviour
         }
     }
 
+    public bool TryGetTeamColorMaterial(string name, out Material mtl)
+    {
+        return _materialCache.TryGetValue(name, out mtl);
+    }
+
+    public void CacheTeamColorMaterial(string name, Material mtl)
+    {
+        _materialCache.Add(name, mtl);
+    }
+
     private Dictionary<GameResources.ResourceType, int> _playerResources, _playerResourceLimits;
+    private Dictionary<string, Material> _materialCache = new Dictionary<string, Material>();
 
     public Color TeamColor;
     private HighLevelAI AI = null;

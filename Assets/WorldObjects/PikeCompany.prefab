@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4559964144986826}
   - component: {fileID: 33582174614051190}
   - component: {fileID: 23384683196959696}
+  - component: {fileID: 114394695799719296}
   m_Layer: 10
   m_Name: MiniMapSymbol
   m_TagString: Untagged
@@ -95,8 +96,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1804910272351362}
-  m_LocalRotation: {x: -0, y: -0.39338264, z: -0, w: 0.9193749}
-  m_LocalPosition: {x: -136.5, y: 0, z: 37}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -32.4, y: 0, z: 15.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4084462906536602}
@@ -175,6 +176,19 @@ MonoBehaviour:
   CardImage: {fileID: 2800000, guid: bce2db95086c19e44a91853cbc3022f3, type: 3}
   _attackBehavior: 0
   ReinforceAction: PikemenReinforce
+--- !u!114 &114394695799719296
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1015749935665580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7987e10ac25e724469a1bfd70db7e267, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TeamcolorMaskMaterial: {fileID: 2100000, guid: fd69d167287ce2f44bdabbfaa6945332,
+    type: 2}
 --- !u!120 &120036824254489520
 LineRenderer:
   m_ObjectHideFlags: 1
