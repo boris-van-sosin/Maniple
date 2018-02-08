@@ -93,6 +93,7 @@ public class WorldObject : MonoBehaviour {
     }
 
     public bool HasQueuedOrders { get { return _orderQueue.Count > 0; } }
+    public int NumQueuedOrders { get { return _orderQueue.Count; } }
 
     public virtual string[] GetActions()
     {
